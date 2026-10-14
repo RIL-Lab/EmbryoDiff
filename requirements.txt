@@ -1,0 +1,14 @@
+# PyTorch is installed separately, with the CUDA build that matches your driver, e.g.
+#   pip install torch==2.5.0 torchvision==0.20.0 --index-url https://download.pytorch.org/whl/cu124
+# The versions below must stay compatible with the installed PyTorch build.
+torch==2.5.0
+torchvision==0.20.0
+
+timm==1.0.15
+numpy==1.26.3
+pandas==2.2.3
+scipy==1.13.1
+pillow==11.2.1
+
+tensorboard==2.11.2
+tqdm==4.65.2

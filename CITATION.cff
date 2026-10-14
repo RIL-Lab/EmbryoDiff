@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the following paper."
+title: "EmbryoDiff: A Conditional Diffusion Framework with Multi-Focal Feature Fusion for Fine-Grained Embryo Developmental Stage Recognition"
+type: software
+authors:
+  - family-names: "Sun"
+    given-names: "Yong"
+repository-code: "https://github.com/RIL-Lab/EmbryoDiff"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "EmbryoDiff: A Conditional Diffusion Framework with Multi-Focal Feature Fusion for Fine-Grained Embryo Developmental Stage Recognition"
+  collection-title: "Proceedings of the AAAI Conference on Artificial Intelligence"
+  year: 2026
+

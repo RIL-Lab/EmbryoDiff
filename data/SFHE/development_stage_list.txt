@@ -1,0 +1,12 @@
+0 tPNa
+1 tPNf
+2 t2
+3 t3
+4 t4
+5 t5
+6 t8
+7 tSC
+8 tM
+9 tSB
+10 tB
+11 tHB

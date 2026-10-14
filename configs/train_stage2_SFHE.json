@@ -1,0 +1,83 @@
+{
+    "data": {
+        "dataset_name": "SFHE",
+        "num_classes": 12,
+        "num_workers": 16,
+        "train_split": "path_to_project/data/SFHE/annotations/train_annos.json",
+        "test_split": "path_to_project/data/SFHE/annotations/test_annos.json",
+        "video_feat_folder": "path_to_project/data/SFHE/extracted_video_features",
+        "development_stage_list": "path_to_project/data/SFHE/development_stage_list.txt"
+    },
+
+    "encoder_params": {
+        "num_classes": 12,
+        "num_layers": 6,
+        "num_f_maps": 96,
+        "input_dim": 2048,
+        "kernel_size": 5,
+        "normal_dropout_rate": 0.3,
+        "channel_dropout_rate": 0.3,
+        "temporal_dropout_rate": 0.3,
+        "feature_layer_indices": [1, 3, 5]
+      },
+
+
+    "decoder_params": {
+        "num_classes": 12,
+        "input_dim": 288,
+        "num_layers": 8,
+        "num_f_maps": 128,
+        "time_emb_dim": 512,
+        "kernel_size": 5,
+        "dropout_rate": 0.1
+        },
+
+
+    "diffusion_params": {
+        "timesteps": 1000,
+        "sampling_timesteps": 15,
+        "ddim_sampling_eta": 1.0,
+        "snr_scale": 0.1,
+        "cond_types": ["full"],
+        "detach_decoder": false,
+        "value_clipping": 0.1
+        },
+
+
+    "train":{
+        "only_encoder": false,
+        "debug": false,
+        "seed": 3407,
+        "batch_size": 1,
+        "gradient_accumulation_steps": 24,
+        "gradient_clip": 0,
+        "learning_rate": 1e-4,
+        "weight_decay": 0.01,
+        "num_epochs": 350,
+        "test_freq": 1,
+        "subsample_rate": 1,
+        "class_weighting": false,
+        "set_sampling_seed": true,
+        "boundary_smooth": null,
+        "soft_label": null,
+        "log_train_results": false,
+        "loss_weights": {
+            "sem_encoder_ce_loss": 0.8,
+            "sem_encoder_mse_loss": 0.3,
+            "bound_encoder_ce_loss": 0.5,
+
+            "decoder_ce_loss": 1.0,
+            "decoder_mse_loss": 0.0,
+            "decoder_bound_loss": 0.0
+            },
+        "result_dir": "path_to_project/result/SFHE/stage2"
+    },
+
+
+    "test":{
+        "batch_size": 1,
+        "set_sampling_seed": true,
+        "test_mode": ["decoder"]
+    }
+  }
+
