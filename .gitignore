@@ -21,9 +21,8 @@ outputs/
 *.log
 events.out.tfevents.*
 
-# Refined annotations (shared on request, see data/*/annotations/README.md)
+# Refined SFHE annotations (shared on request, see data/SFHE/annotations/README.md)
 data/SFHE/annotations/*.json
-data/MFHE/annotations/*.csv
 !data/SFHE/annotations/README.md
 !data/MFHE/annotations/README.md
 
@@ -41,4 +40,3 @@ data/**/*.png
 .DS_Store
 .idea/
 .vscode/
-

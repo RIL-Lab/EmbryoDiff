@@ -12,7 +12,7 @@ def build_train_test_set(cfg):
     
     elif dataset_name == "MFHE":
         train_set = EmbryoVideoMFHE(split_file=cfg["data"]["train_split"], 
-                                                anno_root=cfg["data"]["anno_root"], 
+                                                anno_root=cfg["data"].get("anno_root"),
                                                 video_feat_folder=cfg["data"]["video_feat_folder"], 
                                                 transform=VideoTransformMFHE(),
                                                 subsample_rate=cfg["train"]["subsample_rate"],
@@ -22,7 +22,7 @@ def build_train_test_set(cfg):
                                                 )
         
         test_set = EmbryoVideoMFHE(split_file=cfg["data"]["test_split"], 
-                                                anno_root=cfg["data"]["anno_root"], 
+                                                anno_root=cfg["data"].get("anno_root"),
                                                 video_feat_folder=cfg["data"]["video_feat_folder"],
                                                 transform=VideoTransformMFHE(),
                                                 subsample_rate=cfg["train"]["subsample_rate"],
@@ -64,10 +64,16 @@ def build_train_test_set_stage1(config):
         raise ValueError("dataset_name is None.")
     
     if dataset_name == "MFHE":
+        if len(config["focal_planes"]) != 1:
+            raise ValueError(
+                "Stage 1 trains one focal plane at a time: set focal_planes to a "
+                "single entry such as [\"F0\"]. The feature extractor can then be "
+                "run over several planes to build the Stage-2 features."
+            )
         train_transform = ImageTransformMFHE(mode="train")
         train_set = EmbryoImageMFHE(
             split_file=config["train_split"],
-            anno_root=config["anno_root"],
+            anno_root=config.get("anno_root"),
             video_root=config["video_root"],
             focal_planes=config["focal_planes"],
             num_classes=config["num_classes"],
@@ -79,7 +85,7 @@ def build_train_test_set_stage1(config):
         test_transform = ImageTransformMFHE(mode="test")
         test_set = EmbryoImageMFHE(
             split_file=config["test_split"],
-            anno_root=config["anno_root"],
+            anno_root=config.get("anno_root"),
             video_root=config["video_root"],
             focal_planes=config["focal_planes"],
             num_classes=config["num_classes"],

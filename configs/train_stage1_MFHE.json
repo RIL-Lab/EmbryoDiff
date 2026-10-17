@@ -18,7 +18,6 @@
   "dataset_name": "MFHE",
   "train_split": "path_to_project/data/MFHE/annotations/train_set.csv",
   "test_split": "path_to_project/data/MFHE/annotations/test_set.csv",
-  "anno_root": "path_to_MFHE_annotations",
   "video_root": "path_to_MFHE_videos",
   "focal_planes": ["F0"],
   "base_save_dir": "path_to_project/result/MFHE/stage1",
@@ -27,4 +26,3 @@
   "val_split": "",
   "development_stage_list": "path_to_project/data/MFHE/development_stage_list.txt"
 }
-

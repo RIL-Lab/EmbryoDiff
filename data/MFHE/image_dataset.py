@@ -10,14 +10,16 @@ from collections.abc import Mapping, Sequence
 from torch.utils.data.dataloader import default_collate
 from typing import Dict, List, Any, Optional
 
+from data.MFHE.annotation_index import missing_annotations_error, resolve_anno_root
+
 
 class EmbryoImageMFHE(Dataset):
-    def __init__(self, split_file: str, anno_root: str, video_root: str, 
+    def __init__(self, split_file: str, anno_root: Optional[str], video_root: str,
                  focal_planes: List[str] = ["F0"], num_classes: int = 15,
                  subsample_rate: int = 1, transform: Optional[callable] = None, debug=False):
         super().__init__()
         self.split_file = split_file
-        self.anno_root = anno_root
+        self.anno_root = resolve_anno_root(split_file, anno_root)
         self.video_root = video_root
         self.num_classes = num_classes
         self.transform = transform
@@ -31,6 +33,9 @@ class EmbryoImageMFHE(Dataset):
 
         self.data = self._preload_data_paths()
 
+        if not self.data:
+            raise missing_annotations_error(split_file, self.anno_root)
+
         if debug:
             self.data = self.data[:1024]
 
@@ -38,6 +43,9 @@ class EmbryoImageMFHE(Dataset):
         return filename.split("_annotations")[0]
 
     def _preload_data_paths(self) -> List[Dict]:
+        if not os.path.isdir(self.anno_root):
+            raise missing_annotations_error(self.split_file, self.anno_root)
+
         data = []
         for anno_file in self.sample_list:
             abs_path = os.path.join(self.anno_root, anno_file)

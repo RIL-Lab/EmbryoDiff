@@ -164,7 +164,7 @@ if __name__ == "__main__":
     elif args.dataset == "MFHE":
         test_set = EmbryoVideoMFHE(
             split_file=configs["data"]["test_split"], 
-            anno_root=configs["data"]["anno_root"], 
+            anno_root=configs["data"].get("anno_root"),
             video_feat_folder=configs["data"]["video_feat_folder"],
             transform=VideoTransformMFHE(),
             subsample_rate=configs["train"]["subsample_rate"],
@@ -208,5 +208,4 @@ if __name__ == "__main__":
     )
 
     tester.run_testing()
-
 

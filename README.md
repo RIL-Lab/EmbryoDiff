@@ -69,11 +69,11 @@ outside this repository (for example `/data/embryo/`). Please cite the correspon
 
 > **Refined annotations.**
 > For the paper we re-checked the frame-level stage labels and fixed the noisy stage
-> boundaries of the raw releases (this matters most for MFHE). These refined annotation
-> files are **not** published with this repository; without them you can still run the
-> code, but you will get the raw, noisier supervision. The expected file names and
-> formats are documented in `data/SFHE/annotations/README.md` and
-> `data/MFHE/annotations/README.md`. If you need the refined annotations,
+> boundaries of the raw releases (this matters most for MFHE). The refined **MFHE**
+> annotations used in our experiments ship with this repository under
+> `data/MFHE/annotations/` (655 per-video files, one row per annotated frame, plus the
+> train/test split lists). The refined **SFHE** annotations are not redistributed here;
+> their format is documented in `data/SFHE/annotations/README.md`, and if you need them
 > please send us an email.
 
 Expected layout once the data is in place:
@@ -86,7 +86,10 @@ data/SFHE/
 └── extracted_video_features/     # <video_name>.npy, produced by the feature extractor
 
 data/MFHE/
-├── annotations/                  # train_set.csv / test_set.csv (refined, on request)
+├── annotations/
+│   ├── train_set.csv             # split definitions
+│   ├── test_set.csv
+│   └── per_video/                # <video_name>_annotations.csv (refined, included)
 ├── development_stage_list.txt
 ├── videos/                       # F0 frames:  <video_name>/<frame_name>
 ├── videos_<focal>/               # other focal planes, same layout
@@ -104,10 +107,10 @@ Every config in `configs/` is written with two kinds of placeholders:
 
 * `path_to_project/` is replaced automatically by the repository root, so you normally do
   not have to touch paths that live inside the repo.
-* `path_to_*_videos` / `path_to_MFHE_annotations` are dataset locations that you must
-  replace with the real paths on your machine.
+* `path_to_*_videos` are dataset locations that you must replace with the real paths on
+  your machine.
 
-Also check `device` (`[0]` = first GPU, `-1` is not supported for training) and
+Also check `device` (`[0]` = first GPU, `-1` = CPU, for debugging only) and
 `base_save_dir` / `train.result_dir` in the configs.
 
 ### 1. Stage-1 training
@@ -129,6 +132,10 @@ python -m scripts.train_stage1 --config configs/train_stage1_SFHE.json --device 
 Logs, the resolved config and the best checkpoint are written to
 `<base_save_dir>/<exp_name>/{logging,config.json,trained_model/best_model.pth}`.
 
+Stage 1 trains on one focal plane at a time, so `focal_planes` must hold a single
+entry such as `["F0"]`. The feature extractor below can then run over several planes
+and stack them for Stage 2.
+
 ### 2. Extract the Stage-1 features
 
 ```bash
@@ -142,7 +149,7 @@ python data/SFHE/extract_video_feats.py \
 
 python data/MFHE/extract_video_feats.py \
     --split_file data/MFHE/annotations/train_set.csv \
-    --anno_root /path/to/MFHE/annotations \
+    --anno_root /path/to/MFHE/annotations/per_video \
     --video_root /path/to/MFHE/videos \
     --focal_planes "F0" \
     --resnet_path result/MFHE/stage1/stage1_mfhe/trained_model/best_model.pth \
@@ -220,9 +227,5 @@ them.
 ## License
 
 Released under the MIT License, see [LICENSE](LICENSE).
-
-
-
-
 
 

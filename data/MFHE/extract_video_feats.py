@@ -15,6 +15,10 @@ from tqdm import tqdm
 from typing import List, Dict
 import argparse
 from models.resnet50 import ResNet
+from data.MFHE.annotation_index import (
+    missing_annotations_error,
+    resolve_anno_root,
+)
 
 
 def parse_args():
@@ -40,8 +44,9 @@ def parse_args():
                         help="Crop dimension for preprocessing")
     parser.add_argument("--split_file", type=str, required=True,
                         help="CSV file that lists sample annotation filenames")
-    parser.add_argument("--anno_root", type=str, required=True,
-                        help="Root directory of per-video annotation CSVs")
+    parser.add_argument("--anno_root", type=str, default=None,
+                        help="Directory of per-video annotation CSVs. Defaults "
+                             "to <split_file dir>/per_video.")
     parser.add_argument("--focal_planes", type=str, default="F0",
                         help="Comma-separated focal planes, e.g. "
                              "\"F-45,F-30,F-15,F0,F15,F30,F45\" "
@@ -54,6 +59,9 @@ def parse_args():
 
 def load_video_metadata(split_file: str, anno_root: str,
                         subsample_rate: int) -> Dict[str, List[str]]:
+    if not os.path.isdir(anno_root):
+        raise missing_annotations_error(split_file, anno_root)
+
     sample_list = pd.read_csv(split_file)["filename"].tolist()
     video_metadata: Dict[str, List[str]] = {}
 
@@ -73,6 +81,9 @@ def load_video_metadata(split_file: str, anno_root: str,
         video_name = anno_file.split("_annotations")[0]
         frame_names = df["frame_name"].values.tolist()
         video_metadata[video_name] = frame_names
+
+    if not video_metadata:
+        raise missing_annotations_error(split_file, anno_root)
 
     return video_metadata
 
@@ -141,9 +152,10 @@ def main(args):
         crop=args.crop
     )
 
+    anno_root = resolve_anno_root(args.split_file, args.anno_root)
     video_meta = load_video_metadata(
         split_file=args.split_file,
-        anno_root=args.anno_root,
+        anno_root=anno_root,
         subsample_rate=args.subsample_rate
     )
 
@@ -194,5 +206,3 @@ def main(args):
 if __name__ == "__main__":
     args = parse_args()
     main(args)
-
-

@@ -4,7 +4,6 @@
         "num_classes": 15,
         "num_workers": 16,
         "train_split": "path_to_project/data/MFHE/annotations/train_set.csv",
-        "anno_root": "path_to_MFHE_annotations",
         "test_split": "path_to_project/data/MFHE/annotations/test_set.csv",
         "video_feat_folder": "path_to_project/data/MFHE/extracted_video_features",
         "development_stage_list": "path_to_project/data/MFHE/development_stage_list.txt"
@@ -81,4 +80,3 @@
         "test_mode": ["decoder"]
     }
   }
-

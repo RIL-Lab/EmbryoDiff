@@ -9,14 +9,16 @@ from torch.nn.utils.rnn import pad_sequence
 from typing import List, Optional
 from itertools import chain
 
+from data.MFHE.annotation_index import missing_annotations_error, resolve_anno_root
+
 
 class EmbryoVideoMFHE(Dataset):
-    def __init__(self, split_file: str, anno_root: str, video_feat_folder: str, 
+    def __init__(self, split_file: str, anno_root: Optional[str], video_feat_folder: str,
                  focal_planes: List[str] = ["F0"], num_classes: int = 15,
                  subsample_rate: int = 1, fast_load: bool = False, transform: Optional[callable] = None, boundary_smooth=None):
         super().__init__()
         self.split_file = split_file
-        self.anno_root = anno_root
+        self.anno_root = resolve_anno_root(split_file, anno_root)
         self.video_feat_folder = video_feat_folder
         self.num_classes = num_classes
         self.transform = transform
@@ -27,6 +29,9 @@ class EmbryoVideoMFHE(Dataset):
     
         self.sample_list = pd.read_csv(split_file)["filename"].tolist()
         self.data_list = self._load_data()
+
+        if not self.data_list:
+            raise missing_annotations_error(split_file, self.anno_root)
 
         self.video_list = self.get_video_list()
 
@@ -40,6 +45,9 @@ class EmbryoVideoMFHE(Dataset):
     
     def _load_data(self):
         anno_root = self.anno_root
+        if not os.path.isdir(anno_root):
+            raise missing_annotations_error(self.split_file, anno_root)
+
         data = []
         if self.fast_load:
             self.sample_list = self.sample_list[:10]
