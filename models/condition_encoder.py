@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from models.diffusion_utils import *
 
 
-### modified from diffact ###
 class EncoderModel(nn.Module):
     def __init__(self, num_layers, num_f_maps, input_dim, num_classes, kernel_size, 
                  normal_dropout_rate, channel_dropout_rate, temporal_dropout_rate,
@@ -190,3 +189,4 @@ class MixedConvAttentionLayer(nn.Module):
         out = self.ffn_block(self.norm(out1 + out2))
 
         return x + out
+

@@ -73,8 +73,8 @@ outside this repository (for example `/data/embryo/`). Please cite the correspon
 > files are **not** published with this repository; without them you can still run the
 > code, but you will get the raw, noisier supervision. The expected file names and
 > formats are documented in `data/SFHE/annotations/README.md` and
-> `data/MFHE/annotations/README.md`. If you need the refined annotations, or the
-> pre-extracted Stage-1 features, please send us an email.
+> `data/MFHE/annotations/README.md`. If you need the refined annotations,
+> please send us an email.
 
 Expected layout once the data is in place:
 
@@ -188,16 +188,9 @@ Pass `--encoder_only` to evaluate the temporal encoders without the diffusion de
 
 ## Notes and limitations
 
-* **Stage 2 runs with `batch_size = 1`.** Videos have different lengths, and the collate
-  function pads them with `-100`; those padded frames are still pushed through the stage
-  embedding and the decoder, so batching more than one video raises an index error.
-  Keep `train.batch_size` and `test.batch_size` at `1` and use `gradient_accumulation_steps`
-  to reach a larger effective batch size (the released configs use `24`).
-  `eval/inference.py` likewise evaluates one video at a time.
-* **The decoder input size is tied to the encoder.** `decoder_params.input_dim` must equal
-  `encoder_params.num_f_maps` times the number of `encoder_params.feature_layer_indices`
-  (the released configs use 96 x 3 = 288). Changing the encoder width without updating
-  `input_dim` fails at the first decoder convolution.
+* **Stage 2 runs with `batch_size = 1`.** One video is processed per step; increase
+  `gradient_accumulation_steps` for a larger effective batch size (the released configs
+  use `24`). The same holds for `eval/inference.py`.
 * Stage-1 frames are resized to 256 and cropped to 224 (`Resize(256)` + `RandomResizedCrop(224)`
   for training, `CenterCrop(224)` for testing).
 * The released configs train Stage 2 for 350 epochs and sample with `sampling_timesteps = 15`
@@ -218,9 +211,8 @@ An extended version is available at [arXiv:2511.11027](https://arxiv.org/abs/251
 
 ## Acknowledgements
 
-The temporal encoders and the diffusion decoder build on
-[DiffAct](https://github.com/finspiredx/DiffAct) and the cosine noise schedule of
-[Improved Denoising Diffusion Probabilistic Models](https://openreview.net/forum?id=-NEXDKk8gZ).
+The cosine noise schedule follows [Improved Denoising Diffusion Probabilistic
+Models](https://openreview.net/forum?id=-NEXDKk8gZ).
 The SFHE and MFHE datasets were released by the authors of *EmbryosFormer* and
 *Towards Deep Learning-Powered IVF* respectively; please cite those papers when you use
 them.
@@ -228,6 +220,7 @@ them.
 ## License
 
 Released under the MIT License, see [LICENSE](LICENSE).
+
 
 
 
