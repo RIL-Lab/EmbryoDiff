@@ -19,6 +19,7 @@ from data.MFHE.annotation_index import (
     missing_annotations_error,
     resolve_anno_root,
 )
+from data.MFHE.frame_paths import resolve_frame_path
 
 
 def parse_args():
@@ -97,7 +98,7 @@ def build_frame_path(video_name: str,
     - others: base_dir = f"{video_root}_{focal}"
     """
     base_dir = f"{video_root}_{focal}" if focal != "F0" else video_root
-    return os.path.join(base_dir, video_name, frame_name)
+    return resolve_frame_path(os.path.join(base_dir, video_name, frame_name))
 
 
 class ResNetFeatureExtractor:

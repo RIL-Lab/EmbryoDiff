@@ -11,6 +11,7 @@ from torch.utils.data.dataloader import default_collate
 from typing import Dict, List, Any, Optional
 
 from data.MFHE.annotation_index import missing_annotations_error, resolve_anno_root
+from data.MFHE.frame_paths import resolve_frame_path
 
 
 class EmbryoImageMFHE(Dataset):
@@ -78,7 +79,7 @@ class EmbryoImageMFHE(Dataset):
 
     def _build_frame_path(self, video_name: str, frame_name: str, focal: str) -> str:
         base_dir = f"{self.video_root}_{focal}" if focal != "F0" else self.video_root
-        return os.path.join(base_dir, video_name, frame_name)
+        return resolve_frame_path(os.path.join(base_dir, video_name, frame_name))
     
     def get_class_weights(self):
         full_event_seq = np.array([item['f_stage_label'] for item in self.data])

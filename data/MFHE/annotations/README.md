@@ -7,6 +7,12 @@ distributed together with the train/test split lists. The video frames themselve
 (*Towards Deep Learning-Powered IVF: A Large Public Benchmark for Morphokinetic
 Parameter Prediction*) and cite that paper when you use the data.
 
+| split | videos | annotated frames |
+| --- | --- | --- |
+| `train_set.csv` | 458 | 187,860 |
+| `test_set.csv` | 197 | 80,152 |
+| total | 655 | 268,012 |
+
 ## Layout
 
 ```text
@@ -33,7 +39,9 @@ frame_idx,frame_name,fine_stage_label,coarse_stage_label
 ...
 ```
 
-* `frame_name` is relative to the focal-plane video root configured for Stage 1.
+* `frame_name` is relative to the focal-plane video root configured for Stage 1. The
+  names use the `.jpg` frames of the re-saved release; if your copy still has the
+  original `.jpeg` files, the loaders fall back to that suffix automatically.
 * `fine_stage_label` indexes `../development_stage_list.txt`.
 * Rows are in temporal order; frames before the annotated start are not listed.
 

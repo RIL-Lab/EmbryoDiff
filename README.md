@@ -58,9 +58,10 @@ multi-GPU training.
 
 ## Datasets
 
-We do **not** redistribute the datasets. Both are public datasets released by their
-authors; download them from their original releases, accept their terms, and place them
-outside this repository (for example `/data/embryo/`). Please cite the corresponding paper:
+We do **not** redistribute the dataset images. Both are public datasets released by
+their authors; download them from their original releases, accept their terms, and place
+them outside this repository (for example `/data/embryo/`). Please cite the
+corresponding paper:
 
 | Dataset | Source paper |
 | --- | --- |
@@ -71,8 +72,9 @@ outside this repository (for example `/data/embryo/`). Please cite the correspon
 > For the paper we re-checked the frame-level stage labels and fixed the noisy stage
 > boundaries of the raw releases (this matters most for MFHE). The refined **MFHE**
 > annotations used in our experiments ship with this repository under
-> `data/MFHE/annotations/` (655 per-video files, one row per annotated frame, plus the
-> train/test split lists). The refined **SFHE** annotations are not redistributed here;
+> `data/MFHE/annotations/`: 655 videos (458 train / 197 test), 268,012 annotated frames,
+> one CSV per video plus the train/test split lists. The refined **SFHE** annotations are
+> not redistributed here;
 > their format is documented in `data/SFHE/annotations/README.md`, and if you need them
 > please send us an email.
 
@@ -99,6 +101,10 @@ data/MFHE/
 SFHE features have shape `(T, 2048)`; MFHE features stack all focal planes as
 `(num_focal, T, 2048)`.
 
+For MFHE, `videos/` holds the central plane (`F0`) frames used to train Stage 1;
+`videos_<focal>/` holds the remaining planes, which are only read by the feature
+extractor.
+
 ## Training
 
 ### 0. Paths in the configs
@@ -114,6 +120,12 @@ Also check `device` (`[0]` = first GPU, `-1` = CPU, for debugging only) and
 `base_save_dir` / `train.result_dir` in the configs.
 
 ### 1. Stage-1 training
+
+Stage 1 is a single-plane frame classifier: for both datasets it is trained on the
+**central focal plane (`F0`)** only. `focal_planes` in the Stage-1 config must therefore
+contain exactly one entry, `["F0"]`, and each video folder under `videos/` holds the F0
+frames. The other focal planes are not used to train Stage 1; they are fused later, in
+Stage 2.
 
 ```bash
 # SFHE
@@ -132,11 +144,13 @@ python -m scripts.train_stage1 --config configs/train_stage1_SFHE.json --device 
 Logs, the resolved config and the best checkpoint are written to
 `<base_save_dir>/<exp_name>/{logging,config.json,trained_model/best_model.pth}`.
 
-Stage 1 trains on one focal plane at a time, so `focal_planes` must hold a single
-entry such as `["F0"]`. The feature extractor below can then run over several planes
-and stack them for Stage 2.
-
 ### 2. Extract the Stage-1 features
+
+The extractor applies the Stage-1 ResNet to every annotated frame and writes one
+`<video_name>.npy` per video. Run it once per split (`train_set.csv` and
+`test_set.csv`); both write into the same output folder. For MFHE it can read several
+focal planes and stacks the result as `(num_focal, T, 2048)`; Stage 2 averages over the
+focal-plane axis, so the planes you pass here are exactly the ones that are fused.
 
 ```bash
 python data/SFHE/extract_video_feats.py \
@@ -147,15 +161,18 @@ python data/SFHE/extract_video_feats.py \
     --output_dir data/SFHE/extracted_video_features \
     --gpu_id 0
 
-python data/MFHE/extract_video_feats.py \
-    --split_file data/MFHE/annotations/train_set.csv \
-    --anno_root /path/to/MFHE/annotations/per_video \
-    --video_root /path/to/MFHE/videos \
-    --focal_planes "F0" \
-    --resnet_path result/MFHE/stage1/stage1_mfhe/trained_model/best_model.pth \
-    --config_path result/MFHE/stage1/stage1_mfhe/config.json \
-    --output_dir data/MFHE/extracted_video_features \
-    --gpu_id 0
+# one run per split; the per-video annotation files are found in
+# data/MFHE/annotations/per_video next to the split file
+for split in train test; do
+  python data/MFHE/extract_video_feats.py \
+      --split_file data/MFHE/annotations/${split}_set.csv \
+      --video_root /path/to/MFHE/videos \
+      --focal_planes "F-45,F-30,F-15,F0,F15,F30,F45" \
+      --resnet_path result/MFHE/stage1/stage1_mfhe/trained_model/best_model.pth \
+      --config_path result/MFHE/stage1/stage1_mfhe/config.json \
+      --output_dir data/MFHE/extracted_video_features \
+      --gpu_id 0
+done
 ```
 
 ### 3. Stage-2 training
@@ -227,5 +244,3 @@ them.
 ## License
 
 Released under the MIT License, see [LICENSE](LICENSE).
-
-
